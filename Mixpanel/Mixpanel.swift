@@ -102,8 +102,10 @@ open class Mixpanel {
         if let instance = MixpanelManager.sharedInstance.getMainInstance() {
             return instance
         } else {
-            assert(false, "You have to call initialize(token:) before calling the main instance, " +
-                "or define a new main instance if removing the main one")
+            let errorMessage = "You have to call initialize(token:) before calling the main instance, " +
+            "or define a new main instance if removing the main one"
+            assert(false, errorMessage)
+            Logger.error(message: errorMessage)
             return Mixpanel.initialize(token: "")
         }
     }
