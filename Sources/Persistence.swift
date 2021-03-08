@@ -25,7 +25,13 @@ struct ArchivedProperties {
 }
 
 class Persistence {
-    private static let archiveQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.archiveQueue", qos: .utility)
+    private static let archiveQueue: DispatchQueue = {
+        if #available(iOS 10.0, *) {
+            return DispatchQueue(label: "com.mixpanel.archiveQueue", qos: .utility, autoreleaseFrequency: .workItem)
+        } else {
+            return DispatchQueue(label: "com.mixpanel.archiveQueue", qos: .utility)
+        }
+    }()
 
     enum ArchiveType: String {
         case events
