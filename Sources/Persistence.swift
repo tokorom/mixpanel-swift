@@ -25,13 +25,7 @@ struct ArchivedProperties {
 }
 
 class Persistence {
-    private static let archiveQueue: DispatchQueue = {
-        if #available(iOS 10.0, *) {
-            return DispatchQueue(label: "com.mixpanel.archiveQueue", qos: .utility, autoreleaseFrequency: .workItem)
-        } else {
-            return DispatchQueue(label: "com.mixpanel.archiveQueue", qos: .utility)
-        }
-    }()
+    private static let archiveQueue: DispatchQueue = DispatchQueue(label: "com.mixpanel.archiveQueue", qos: .utility)
 
     enum ArchiveType: String {
         case events
@@ -94,58 +88,72 @@ class Persistence {
 
     static func archiveEvents(_ eventsQueue: Queue, token: String) {
         archiveQueue.sync { [eventsQueue, token] in
-            archiveToFile(.events, object: eventsQueue, token: token)
+            autoreleasepool {
+                archiveToFile(.events, object: eventsQueue, token: token)
+            }
         }
     }
 
     static func archivePeople(_ peopleQueue: Queue, token: String) {
         archiveQueue.sync { [peopleQueue, token] in
-            archiveToFile(.people, object: peopleQueue, token: token)
+            autoreleasepool {
+                archiveToFile(.people, object: peopleQueue, token: token)
+            }
         }
     }
 
     static func archiveGroups(_ groupsQueue: Queue, token: String) {
         archiveQueue.sync { [groupsQueue, token] in
-            archiveToFile(.groups, object: groupsQueue, token: token)
+            autoreleasepool {
+                archiveToFile(.groups, object: groupsQueue, token: token)
+            }
         }
     }
 
     static func archiveOptOutStatus(_ optOutStatus: Bool, token: String) {
         archiveQueue.sync { [optOutStatus, token] in
-            archiveToFile(.optOutStatus, object: optOutStatus, token: token)
+            autoreleasepool {
+                archiveToFile(.optOutStatus, object: optOutStatus, token: token)
+            }
         }
     }
 
     static func archiveProperties(_ properties: ArchivedProperties, token: String) {
         archiveQueue.sync { [properties, token] in
-            var p = InternalProperties()
-            p["distinctId"] = properties.distinctId
-            p["anonymousId"] = properties.anonymousId
-            p["userId"] = properties.userId
-            p["alias"] = properties.alias
-            p["hadPersistedDistinctId"] = properties.hadPersistedDistinctId
-            p["superProperties"] = properties.superProperties
-            p["peopleDistinctId"] = properties.peopleDistinctId
-            p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
-            p["timedEvents"] = properties.timedEvents
-            #if DECIDE
-            p["shownNotifications"] = properties.shownNotifications
-            p["automaticEvents"] = properties.automaticEventsEnabled
-            #endif // DECIDE
-            archiveToFile(.properties, object: p, token: token)
+            autoreleasepool {
+                var p = InternalProperties()
+                p["distinctId"] = properties.distinctId
+                p["anonymousId"] = properties.anonymousId
+                p["userId"] = properties.userId
+                p["alias"] = properties.alias
+                p["hadPersistedDistinctId"] = properties.hadPersistedDistinctId
+                p["superProperties"] = properties.superProperties
+                p["peopleDistinctId"] = properties.peopleDistinctId
+                p["peopleUnidentifiedQueue"] = properties.peopleUnidentifiedQueue
+                p["timedEvents"] = properties.timedEvents
+                #if DECIDE
+                p["shownNotifications"] = properties.shownNotifications
+                p["automaticEvents"] = properties.automaticEventsEnabled
+                #endif // DECIDE
+                archiveToFile(.properties, object: p, token: token)
+            }
         }
     }
 
     #if DECIDE
     static func archiveVariants(_ variants: Set<Variant>, token: String) {
         archiveQueue.sync { [variants, token] in
-            archiveToFile(.variants, object: variants, token: token)
+            autoreleasepool {
+                archiveToFile(.variants, object: variants, token: token)
+            }
         }
     }
 
     static func archiveCodelessBindings(_ codelessBindings: Set<CodelessBinding>, token: String) {
         archiveQueue.sync { [codelessBindings, token] in
-            archiveToFile(.codelessBindings, object: codelessBindings, token: token)
+            autoreleasepool {
+                archiveToFile(.codelessBindings, object: codelessBindings, token: token)
+            }
         }
     }
     #endif // DECIDE
